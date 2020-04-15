@@ -2,7 +2,7 @@ Submitted:
 
 Team Members:
 Raymond Bryant, rbryant42@gatech.edu
-Jasmine Chacko, jchacko...
+Jasmine Chacko, jchacko6@gatech.edu
 
 Files:
 tsp-3510.py- python file containing the TSP algorithm
