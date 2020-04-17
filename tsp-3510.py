@@ -22,11 +22,6 @@ def main(args):
 		y = float(parts[2])
 		nodes[node] = (x,y)
 
-		# if node == 18:
-		# 	plt.plot(x, y, marker='o', color='black')
-		# else:
-		# 	plt.plot(x, y, marker='o')
-
 	# initialize pairwise distance matrix
 	pairwise = [[0 for i in range(len(nodes)+1)] for j in range(len(nodes)+1)]
 
@@ -77,18 +72,6 @@ def main(args):
 	outputFile = open(args[2], 'w')
 	outputFile.write('{}\n'.format(bestCost))
 	outputFile.write(' '.join(str(item) for item in bestTour))
-
-	# colors = ['b', 'g', 'r', 'm', 'y', 'c', 'k', 'w']
-	# colorIndex = 0
-	# for tour in allTours:
-	# 	for i in range(len(tour) - 1):
-	# 		x1, y1 = nodes[tour[i]]
-	# 		x2, y2 = nodes[tour[i + 1]]
-	# 		plt.plot([x1, x2], [y1, y2], colors[colorIndex])
-	# 	if colorIndex > len(colors):
-	# 		continue
-	# 	colorIndex += 1
-	# plt.show()
 
 	outputFile.close()
 	f.close()
