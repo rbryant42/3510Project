@@ -14,7 +14,6 @@ def main(args):
 	maxTime = args[3]
 	output_filename = args[2]
 	f = open(args[1], 'r')
-	# {node: (x, y)}
 	nodes = dict()
 	for line in f:
 		parts = line.split()
@@ -23,7 +22,11 @@ def main(args):
 		y = float(parts[2])
 		nodes[node] = (x,y)
 
-		plt.plot(x, y, marker='o')
+		# if node == 18:
+		# 	plt.plot(x, y, marker='o', color='black')
+		# else:
+		# 	plt.plot(x, y, marker='o')
+
 	# initialize pairwise distance matrix
 	pairwise = [[0 for i in range(len(nodes)+1)] for j in range(len(nodes)+1)]
 
@@ -39,14 +42,13 @@ def main(args):
 				dist = round(math.sqrt((xdiff**2 + ydiff**2)))
 				pairwise[i][j] = dist
 
-	runs = 1
 	allCosts = []
 	allTours = []
+	startNode = newStartNode(pairwise)
 	# runs until time is up
-	while (float(time.time() - start) <= float(maxTime)) and runs < 9:
+	while (float(time.time() - start) <= float(maxTime)):
 		# get initial tour
 		# doesn't have to be great, but helps computation if it's better than random
-		startNode = newStartNode(nodes)
 		cost  = 0
 		initTour = []
 		initTour.append(startNode)
@@ -68,33 +70,13 @@ def main(args):
 		cost += pairwise[initTour[len(initTour)-1]][startNode]
 
 		# find best tour by running twoOpt
-		bestTour = twoOpt(pairwise, initTour)
+		bestTour = twoOpt(pairwise, initTour, maxTime)
 		bestCost = findCost(pairwise, bestTour)
-		# print result to file
-		if runs == 1:
-			outputFile = open(args[2], 'w')
-		else:
-			outputFile = open(args[2], 'a')
-		outputFile.write('Run: {}\n'.format(runs))
-		outputFile.write('{}\n'.format(bestCost))
-		outputFile.write(' '.join(str(item) for item in bestTour))
-		outputFile.write('\n')
-
-		runs += 1
-		allCosts.append(bestCost)
-		allTours.append(bestTour)
 	
-	# calculating mean and standard deviation of runs
-	print(allCosts)
-	mean = sum(allCosts) / len(allCosts)
-	sumDifferences = 0
-	for cost in allCosts:
-		sumDifferences += ((cost - mean) ** 2)
-	
-	standardDeviation = math.sqrt(sumDifferences / len(allCosts))
-
-	outputFile.write('\nAverage: {}'.format(mean))
-	outputFile.write('\nStandard Deviation: {}'.format(standardDeviation))
+	# print result to file
+	outputFile = open(args[2], 'w')
+	outputFile.write('{}\n'.format(bestCost))
+	outputFile.write(' '.join(str(item) for item in bestTour))
 
 	# colors = ['b', 'g', 'r', 'm', 'y', 'c', 'k', 'w']
 	# colorIndex = 0
@@ -114,11 +96,11 @@ def main(args):
 
 # iteratively checks tour for optimality by swapping two edges 
 # and seeing if the swap is cheaper than what the original had
-def twoOpt(pairwise, tour):
+def twoOpt(pairwise, tour, maxTime):
 
 	best = tour
 	improved = True
-	while improved:
+	while improved and (float(time.time() - start) <= float(maxTime)):
 		improved = False
 		for i in range(1, len(best)-2):
 			for j in range(i+1, len(best)):
@@ -141,8 +123,22 @@ def findCost(pairwise, tour):
 		cost += pairwise[tour[i]][tour[i+1]]
 	return cost
 
-def newStartNode(nodes):
-	return random.randint(1, len(nodes))
+# finding the node in the middle of the distribution as the start node
+def newStartNode(pairwise):
+	minNode = 0
+	minDistance = 1000000
+	for i in range(1, len(pairwise)):
+		total = 0
+		count = 0
+		for j in range(1, len(pairwise[i])):
+			total += pairwise[i][j]
+			count += 1
+		avg = total / count
+		print(avg)
+		if avg < minDistance:
+			minDistance = avg
+			minNode = i + 1
+	return minNode
 
 
 
