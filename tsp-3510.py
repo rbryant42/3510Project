@@ -37,36 +37,33 @@ def main(args):
 				dist = round(math.sqrt((xdiff**2 + ydiff**2)))
 				pairwise[i][j] = dist
 
-	allCosts = []
-	allTours = []
 	startNode = newStartNode(pairwise)
 	# runs until time is up
-	while (float(time.time() - start) <= float(maxTime)):
-		# get initial tour
-		# doesn't have to be great, but helps computation if it's better than random
-		cost  = 0
-		initTour = []
-		initTour.append(startNode)
-		curr = startNode
+	# get initial tour
+	# doesn't have to be great, but helps computation if it's better than random
+	cost  = 0
+	initTour = []
+	initTour.append(startNode)
+	curr = startNode
 
-		while len(initTour) < len(nodes):
-			currDistances = pairwise[curr]
-			closest = None
-			closestCost = sys.maxsize
-			for i in nodes:
-				if i is not curr and i not in initTour:
-					if currDistances[i] < closestCost:
-						closestCost = currDistances[i]
-						closest = i
-			cost = cost + closestCost
-			initTour.append(closest)
-			curr = closest
-		initTour.append(startNode)
-		cost += pairwise[initTour[len(initTour)-1]][startNode]
+	while len(initTour) < len(nodes):
+		currDistances = pairwise[curr]
+		closest = None
+		closestCost = sys.maxsize
+		for i in nodes:
+			if i is not curr and i not in initTour:
+				if currDistances[i] < closestCost:
+					closestCost = currDistances[i]
+					closest = i
+		cost = cost + closestCost
+		initTour.append(closest)
+		curr = closest
+	initTour.append(startNode)
+	cost += pairwise[initTour[len(initTour)-1]][startNode]
 
-		# find best tour by running twoOpt
-		bestTour = twoOpt(pairwise, initTour, maxTime)
-		bestCost = findCost(pairwise, bestTour)
+	# find best tour by running twoOpt
+	bestTour = twoOpt(pairwise, initTour, maxTime)
+	bestCost = findCost(pairwise, bestTour)
 	
 	# print result to file
 	outputFile = open(args[2], 'w')
@@ -83,17 +80,20 @@ def twoOpt(pairwise, tour, maxTime):
 
 	best = tour
 	improved = True
-	while improved and (float(time.time() - start) <= float(maxTime)):
-		improved = False
-		for i in range(1, len(best)-2):
-			for j in range(i+1, len(best)):
-				if j-i == 1:
-					continue
-				newTour = best[:]
-				newTour[i:j] = best[j-1:i-1:-1]
-				if findCost(pairwise, newTour) < findCost(pairwise, best):
-					best = newTour
-					improved = True
+	while improved:
+		if (float(time.time() - start) <= float(maxTime)):
+			improved = False
+			for i in range(1, len(best)-2):
+				for j in range(i+1, len(best)):
+					if j-i == 1:
+						continue
+					newTour = best[:]
+					newTour[i:j] = best[j-1:i-1:-1]
+					if findCost(pairwise, newTour) < findCost(pairwise, best):
+						best = newTour
+						improved = True
+		else:
+			return best
 	
 	return best
 
@@ -111,13 +111,8 @@ def newStartNode(pairwise):
 	minNode = 0
 	minDistance = 1000000
 	for i in range(1, len(pairwise)):
-		total = 0
-		count = 0
-		for j in range(1, len(pairwise[i])):
-			total += pairwise[i][j]
-			count += 1
-		avg = total / count
-		print(avg)
+		total = sum(pairwise[i])
+		avg = total/(len(pairwise[i])-1)
 		if avg < minDistance:
 			minDistance = avg
 			minNode = i + 1
